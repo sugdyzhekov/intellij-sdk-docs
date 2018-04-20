@@ -54,7 +54,22 @@ semantics of `new File(...)` and _contributes a reference_ into the string liter
 Normally, references can be contributed into elements which don't have their own references, such as string literals
 and comments. References are also often contributed into non-code files, such as XML or JSON.
 
-Contributing references is one of the most common ways to extend an existing language. F
+Contributing references is one of the most common ways to extend an existing language. For example, your plugin can
+contribute references to Java code, even though the Java PSI is part of the platform and not defined in your plugin.
+
+To contribute your own references, see the [reference contributor tutorial](tutorials/custom_language_support/reference_contributor.md).
 
 
-A key capability of references is that they can *cross language boundaries*.  
+## References with Optional or Multiple Resolve Results
+
+In the simplest case, a reference resolves to a single element, and if the resolve fails, this means that the
+code is incorrect and the IDE needs to highlight it as an error. However, there are cases when the situation is different.
+
+The first case is *soft references*. Consider the `new File("foo.txt")` example above. If IntelliJ IDEA can't find
+the file "foo.txt", it doesn't mean that an error needs to be highlighted - maybe the file is only available at runtime.
+Such references return `true` from the `PsiReference.isSoft()` method.
+
+The second case is *polyvariant references*. Consider the case of a JavaScript program. JavaScript is a dynamically
+typed language, so the IDE cannot always precisely determine which method is being called at a particular location.
+To handle this, it provides a reference that can be resolved to multiple possible elements.
+Such references implement the [`PsiPolyVariantReference`](upsource:///platform/core-api/src/com/intellij/psi/PsiPolyVariantReference.java) interface.
